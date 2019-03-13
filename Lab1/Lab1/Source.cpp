@@ -1,7 +1,12 @@
 #include<iostream>
 #include<fstream>
 #include<vector>
+#include<chrono>
+
+#include "Header.h"
+
 using namespace std;
+using namespace std::chrono;
 
 ifstream fin("in.txt");
 ofstream fout("out.txt");
@@ -18,6 +23,8 @@ void thomas(
 	vector<double>& u,
 	const vector<double>& d) {
 
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	
 	int n = u.size();
 	vector<double> p(n);
 	vector<double> q(n);
@@ -34,6 +41,12 @@ void thomas(
 	for (int i = n - 2; i >= 0; i--) {
 		u[i] = p[i] * u[i + 1] + q[i];
 	}
+
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	auto durationMicrosec = duration_cast<microseconds>(t2 - t1).count();
+	auto durationMilisec = duration_cast<milliseconds>(t2 - t1).count();
+	cout << "Microsec " << durationMicrosec << endl;
+	cout << "Millisec " << durationMilisec << endl;
 }
 
 void read_vector(vector<double>& v, int n) {
@@ -61,6 +74,7 @@ void solve_from_file() {
 	}
 }
 
-void main() {
+int main() {
 	solve_from_file();
+	return 0;
 }
