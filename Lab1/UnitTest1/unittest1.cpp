@@ -5,6 +5,7 @@
 
 #include "../Lab1/Header.h"
 #include "../Lab1/Source.cpp"
+#include "../Lab1/Generator.cpp"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -65,6 +66,70 @@ namespace UnitTests
 
 			for (int i = 0; i < n; i++) {
 				Assert::IsTrue(std::abs(u[i] - sol[i]) <= 0.001);
+			}
+		}
+
+		TEST_METHOD(Generated1)
+		{
+			int n = 4;
+			vector<double> a(n);
+			vector<double> b(n);
+			vector<double> c(n);
+			vector<double> d(n);
+			vector<double> u(n);
+			generate_thomas(n, a, b, c, u, d);
+			thomas(a, b, c, u, d);
+
+			for (int i = 0; i < n; i++) {
+				Assert::IsTrue(std::abs(u[i] - 1) <= 0.001);
+			}
+		}
+
+		TEST_METHOD(With10kElems)
+		{
+			int n = 10000;
+			vector<double> a(n);
+			vector<double> b(n);
+			vector<double> c(n);
+			vector<double> d(n);
+			vector<double> u(n);
+			generate_thomas(n, a, b, c, u, d);
+			thomas(a, b, c, u, d);
+
+			for (int i = 0; i < n; i++) {
+				Assert::IsTrue(std::abs(u[i] - 1) <= 0.001);
+			}
+		}
+
+		TEST_METHOD(With100kElems)
+		{
+			int n = 100000;
+			vector<double> a(n);
+			vector<double> b(n);
+			vector<double> c(n);
+			vector<double> d(n);
+			vector<double> u(n);
+			generate_thomas(n, a, b, c, u, d);
+			thomas(a, b, c, u, d);
+
+			for (int i = 0; i < n; i++) {
+				Assert::IsTrue(std::abs(u[i] - 1) <= 0.001);
+			}
+		}
+
+		TEST_METHOD(With1MilElems)
+		{
+			int n = 1000000;
+			vector<double> a(n);
+			vector<double> b(n);
+			vector<double> c(n);
+			vector<double> d(n);
+			vector<double> u(n);
+			generate_thomas(n, a, b, c, u, d);
+			thomas(a, b, c, u, d);
+
+			for (int i = 0; i < n; i++) {
+				Assert::IsTrue(std::abs(u[i] - 1) <= 0.001);
 			}
 		}
 

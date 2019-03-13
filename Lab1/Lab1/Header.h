@@ -14,3 +14,10 @@ void thomas(
 	const vector<double>& c,
 	vector<double>& u,
 	const vector<double>& d);
+
+void generate_thomas(int n,
+	vector<double>& a,
+	vector<double>& b,
+	vector<double>& c,
+	vector<double>& u,
+	vector<double>& d);
