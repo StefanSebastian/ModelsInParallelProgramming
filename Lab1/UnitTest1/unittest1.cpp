@@ -134,6 +134,23 @@ namespace UnitTests
 		}
 
 
+		TEST_METHOD(CyclicRedOmp)
+		{
+
+			int n = 7;
+			vector<double> a(n);
+			vector<double> b(n);
+			vector<double> c(n);
+			vector<double> d(n);
+			vector<double> u(n);
+			generate_thomas(n, a, b, c, u, d);
+			cyclic_reduction_omp(a, b, c, u, d, 4);
+
+			for (int i = 0; i < n; i++) {
+				Assert::IsTrue(std::abs(u[i] - 1) <= 0.001);
+			}
+		}
+
 		TEST_METHOD(CyclicRed)
 		{
 
@@ -144,7 +161,74 @@ namespace UnitTests
 			vector<double> d(n);
 			vector<double> u(n);
 			generate_thomas(n, a, b, c, u, d);
-			cyclic_reduction_omp(a, b, c, u, d);
+			cyclic_reduction(a, b, c, u, d);
+
+			for (int i = 0; i < n; i++) {
+				Assert::IsTrue(std::abs(u[i] - 1) <= 0.001);
+			}
+		}
+
+		TEST_METHOD(CyclicRedThr)
+		{
+
+			int n = 7;
+			vector<double> a(n);
+			vector<double> b(n);
+			vector<double> c(n);
+			vector<double> d(n);
+			vector<double> u(n);
+			generate_thomas(n, a, b, c, u, d);
+			cyclic_reduction_thr(a, b, c, u, d, 4);
+
+			for (int i = 0; i < n; i++) {
+				Assert::IsTrue(std::abs(u[i] - 1) <= 0.001);
+			}
+		}
+
+		TEST_METHOD(CyclicRedOmpLarge)
+		{
+
+			int n = 1023;
+			vector<double> a(n);
+			vector<double> b(n);
+			vector<double> c(n);
+			vector<double> d(n);
+			vector<double> u(n);
+			generate_thomas(n, a, b, c, u, d);
+			cyclic_reduction_omp(a, b, c, u, d, 4);
+
+			for (int i = 0; i < n; i++) {
+				Assert::IsTrue(std::abs(u[i] - 1) <= 0.001);
+			}
+		}
+
+		TEST_METHOD(CyclicRedLarge)
+		{
+
+			int n = 1023;
+			vector<double> a(n);
+			vector<double> b(n);
+			vector<double> c(n);
+			vector<double> d(n);
+			vector<double> u(n);
+			generate_thomas(n, a, b, c, u, d);
+			cyclic_reduction(a, b, c, u, d);
+
+			for (int i = 0; i < n; i++) {
+				Assert::IsTrue(std::abs(u[i] - 1) <= 0.001);
+			}
+		}
+
+		TEST_METHOD(CyclicRedThrLarge)
+		{
+			int n = 1023;
+			vector<double> a(n);
+			vector<double> b(n);
+			vector<double> c(n);
+			vector<double> d(n);
+			vector<double> u(n);
+			generate_thomas(n, a, b, c, u, d);
+			cyclic_reduction_thr(a, b, c, u, d, 4);
 
 			for (int i = 0; i < n; i++) {
 				Assert::IsTrue(std::abs(u[i] - 1) <= 0.001);

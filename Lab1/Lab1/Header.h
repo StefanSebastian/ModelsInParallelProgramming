@@ -2,6 +2,7 @@
 
 using namespace std;
 #include<vector>
+#include<string>
 
 /*
 a, b, c diagonals
@@ -49,3 +50,5 @@ void generate_thomas(int n,
 	vector<double>& d);
 
 void inner_loop_cyclic_red(int i, int n, double** A, double* F, int id, const vector<int>& indexes, int num_threads);
+
+string algorithm_select(int alg);
