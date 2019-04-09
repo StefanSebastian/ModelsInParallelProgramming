@@ -144,7 +144,7 @@ namespace UnitTests
 			vector<double> d(n);
 			vector<double> u(n);
 			generate_thomas(n, a, b, c, u, d);
-			cyclic_reduction(a, b, c, u, d);
+			cyclic_reduction_omp(a, b, c, u, d);
 
 			for (int i = 0; i < n; i++) {
 				Assert::IsTrue(std::abs(u[i] - 1) <= 0.001);

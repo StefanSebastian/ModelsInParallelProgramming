@@ -23,12 +23,22 @@ void cyclic_reduction(
 	const vector<double>& d
 );
 
-void parallel_cyclic_reduction(
-	vector<double>& a,
-	vector<double>& b,
-	vector<double>& c,
+void cyclic_reduction_omp(
+	const vector<double>& a,
+	const vector<double>& b,
+	const vector<double>& c,
 	vector<double>& u,
-	vector<double>& d
+	const vector<double>& d,
+	int num_threads
+);
+
+void cyclic_reduction_thr(
+	const vector<double>& a,
+	const vector<double>& b,
+	const vector<double>& c,
+	vector<double>& u,
+	const vector<double>& d,
+	int num_threads
 );
 
 void generate_thomas(int n,
@@ -37,3 +47,5 @@ void generate_thomas(int n,
 	vector<double>& c,
 	vector<double>& u,
 	vector<double>& d);
+
+void inner_loop_cyclic_red(int i, int n, double** A, double* F, int id, const vector<int>& indexes, int num_threads);
