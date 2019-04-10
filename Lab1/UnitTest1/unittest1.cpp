@@ -238,7 +238,7 @@ namespace UnitTests
 		TEST_METHOD(CyclicRedFill)
 		{
 
-			int n = 10;
+			int n = 100;
 			vector<double> a(n);
 			vector<double> b(n);
 			vector<double> c(n);

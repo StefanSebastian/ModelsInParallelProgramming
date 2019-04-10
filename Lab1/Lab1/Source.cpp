@@ -66,6 +66,8 @@ void cyclic_reduction_omp(
 	vector<double>& d,
 	int num_threads) {
 
+	cout << "cyclic_red_omp" << endl;
+
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
 	int n = u.size();
@@ -155,6 +157,8 @@ void cyclic_reduction_omp(
 			u[idx2] = A[idx2][idx2] == 0 ? 0 : u[idx2] / A[idx2][idx2];
 		}
 	}
+
+	u.resize(old_n);
 
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	auto durationMicrosec = duration_cast<microseconds>(t2 - t1).count();
@@ -282,6 +286,7 @@ void cyclic_reduction_thr(
 	vector<double>& u,
 	vector<double>& d,
 	int num_threads) {
+	cout << "cyclic_red_thr" << endl;
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
@@ -370,6 +375,8 @@ void cyclic_reduction_thr(
 			u[idx2] = A[idx2][idx2] == 0 ? 0 : u[idx2] / A[idx2][idx2];
 		}
 	}
+
+	u.resize(old_n);
 
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	auto durationMicrosec = duration_cast<microseconds>(t2 - t1).count();
@@ -474,7 +481,7 @@ void perform_test(int size, int threads) {
 	cyclic_reduction_thr(a, b, c, u, d, threads);
 	for (int i = 0; i < u.size(); i++) {
 		if (std::abs(u[i] - 1) > 0.001) {
-			cout << "invalid result";
+			cout << "invalid result " << u[i] << endl;
 		}
 	}
 	cout << "finished";
@@ -522,16 +529,12 @@ string algorithm_select(int alg) {
 }
 
 int main(int argc, char* argv[]) {
-	//solve_from_file();
-	//generate_benchmark();
-	//generate_benchmark2();
-
 	if (argc == 4) {
 		int size = atoi(argv[1]);
 		int threads = atoi(argv[2]);
 		int algorithm = atoi(argv[3]);
 		cout << "generating " << size << " data; with " << threads << " nr of threads; algorithm " << algorithm_select(algorithm) << endl;
-		perform_test(size, threads);
+		perform_test_with_alg(size, threads, algorithm);
 	} else if (argc == 3) {
 		int size = atoi(argv[1]);
 		int threads = atoi(argv[2]);
