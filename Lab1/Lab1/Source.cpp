@@ -108,8 +108,8 @@ void cyclic_reduction_omp(
 		}
 	}
 
+	high_resolution_clock::time_point tpart1start = high_resolution_clock::now();
 	omp_set_num_threads(num_threads);
-
 	// cyclic reduction
 	for (int i = 0; i < log2(n + 1) - 1; i++) {
 		int kl = pow(2, i + 1);
@@ -132,6 +132,9 @@ void cyclic_reduction_omp(
 			}
 		}
 	}
+	high_resolution_clock::time_point tpart1stop = high_resolution_clock::now();
+	auto durationMilisecp1 = duration_cast<milliseconds>(tpart1stop - tpart1start).count();
+	cout << "Millisec part1 " << durationMilisecp1 << endl;
 
 	// back subst
 	int idx = (n - 1) / 2;
@@ -219,6 +222,7 @@ void cyclic_reduction(
 		}
 	}
 
+	high_resolution_clock::time_point tpart1start = high_resolution_clock::now();
 	// cyclic reduction
 	for (int i = 0; i < log2(n + 1) - 1; i++) {
 		int kl = pow(2, i + 1);
@@ -235,8 +239,11 @@ void cyclic_reduction(
 			}
 			F[j] -= (alpha * F[idx1] + gamma * F[idx2]);
 		}
-		
 	}
+
+	high_resolution_clock::time_point tpart1stop = high_resolution_clock::now();
+	auto durationMilisecp1 = duration_cast<milliseconds>(tpart1stop - tpart1start).count();
+	cout << "Millisec part1 " << durationMilisecp1 << endl;
 
 	// back subst
 	int idx = (n - 1) / 2;
@@ -328,7 +335,7 @@ void cyclic_reduction_thr(
 		}
 	}
 
-	
+	high_resolution_clock::time_point tpart1start = high_resolution_clock::now();
 	vector<std::thread> threads(num_threads);
 	// cyclic reduction
 	for (int i = 0; i < log2(n + 1) - 1; i++) {
@@ -350,6 +357,9 @@ void cyclic_reduction_thr(
 			threads[tid].join();
 		}
 	}
+	high_resolution_clock::time_point tpart1stop = high_resolution_clock::now();
+	auto durationMilisecp1 = duration_cast<milliseconds>(tpart1stop - tpart1start).count();
+	cout << "Millisec part1 " << durationMilisecp1 << endl;
 	
 	// back subst
 	int idx = (n - 1) / 2;
