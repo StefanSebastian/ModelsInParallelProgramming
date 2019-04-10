@@ -17,28 +17,28 @@ void thomas(
 	const vector<double>& d);
 
 void cyclic_reduction(
-	const vector<double>& a,
-	const vector<double>& b,
-	const vector<double>& c,
+	vector<double>& a,
+	vector<double>& b,
+	vector<double>& c,
 	vector<double>& u,
-	const vector<double>& d
+	vector<double>& d
 );
 
 void cyclic_reduction_omp(
-	const vector<double>& a,
-	const vector<double>& b,
-	const vector<double>& c,
+	vector<double>& a,
+	vector<double>& b,
+	vector<double>& c,
 	vector<double>& u,
-	const vector<double>& d,
+	vector<double>& d,
 	int num_threads
 );
 
 void cyclic_reduction_thr(
-	const vector<double>& a,
-	const vector<double>& b,
-	const vector<double>& c,
+	vector<double>& a,
+	vector<double>& b,
+	vector<double>& c,
 	vector<double>& u,
-	const vector<double>& d,
+	vector<double>& d,
 	int num_threads
 );
 

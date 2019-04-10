@@ -234,5 +234,56 @@ namespace UnitTests
 				Assert::IsTrue(std::abs(u[i] - 1) <= 0.001);
 			}
 		}
+
+		TEST_METHOD(CyclicRedFill)
+		{
+
+			int n = 10;
+			vector<double> a(n);
+			vector<double> b(n);
+			vector<double> c(n);
+			vector<double> d(n);
+			vector<double> u(n);
+			generate_thomas(n, a, b, c, u, d);
+			cyclic_reduction(a, b, c, u, d);
+
+			for (int i = 0; i < n; i++) {
+				Assert::IsTrue(std::abs(u[i] - 1) <= 0.001);
+			}
+		}
+
+		TEST_METHOD(CyclicRedOmpFill)
+		{
+
+			int n = 10;
+			vector<double> a(n);
+			vector<double> b(n);
+			vector<double> c(n);
+			vector<double> d(n);
+			vector<double> u(n);
+			generate_thomas(n, a, b, c, u, d);
+			cyclic_reduction_omp(a, b, c, u, d, 4);
+
+			for (int i = 0; i < n; i++) {
+				Assert::IsTrue(std::abs(u[i] - 1) <= 0.001);
+			}
+		}
+
+		TEST_METHOD(CyclicRedThrFill)
+		{
+
+			int n = 10;
+			vector<double> a(n);
+			vector<double> b(n);
+			vector<double> c(n);
+			vector<double> d(n);
+			vector<double> u(n);
+			generate_thomas(n, a, b, c, u, d);
+			cyclic_reduction_thr(a, b, c, u, d, 4);
+
+			for (int i = 0; i < n; i++) {
+				Assert::IsTrue(std::abs(u[i] - 1) <= 0.001);
+			}
+		}
 	};
 }

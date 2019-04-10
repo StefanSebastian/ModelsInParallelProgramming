@@ -59,17 +59,32 @@ u - the unknowns
 d - rhs matrix
 */
 void cyclic_reduction_omp(
-	const vector<double>& a,
-	const vector<double>& b,
-	const vector<double>& c,
+	vector<double>& a,
+	vector<double>& b,
+	vector<double>& c,
 	vector<double>& u,
-	const vector<double>& d,
+	vector<double>& d,
 	int num_threads) {
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
 	int n = u.size();
 	int r = log2(n);
+
+	// fill with zeroes
+	int old_n = n;
+	int pow2 = 2;
+	while (pow2 - 1 < n) {
+		pow2 = pow2 * 2;
+	}
+	n = pow2 - 1;
+	while (u.size() != n) {
+		u.push_back(0);
+		a.push_back(0);
+		b.push_back(0);
+		c.push_back(0);
+		d.push_back(0);
+	}
 
 	// memory allocation
 	double *F = new double[n];
@@ -105,8 +120,8 @@ void cyclic_reduction_omp(
 				int idx1 = j - offset;
 				int idx2 = j + offset;
 
-				double alpha = A[j][idx1] / A[idx1][idx1];
-				double gamma = A[j][idx2] / A[idx2][idx2];
+				double alpha = A[idx1][idx1] == 0 ? 0 : A[j][idx1] / A[idx1][idx1];
+				double gamma = A[idx2][idx2] == 0 ? 0 : A[j][idx2] / A[idx2][idx2];
 
 				for (int k = 0; k < n; k++) {
 					A[j][k] -= (alpha * A[idx1][k] + gamma * A[idx2][k]);
@@ -136,8 +151,8 @@ void cyclic_reduction_omp(
 					u[idx2] -= A[idx2][k] * u[k];
 				}
 			}
-			u[idx1] = u[idx1] / A[idx1][idx1];
-			u[idx2] = u[idx2] / A[idx2][idx2];
+			u[idx1] = A[idx1][idx1] == 0 ? 0 : u[idx1] / A[idx1][idx1];
+			u[idx2] = A[idx2][idx2] == 0 ? 0 : u[idx2] / A[idx2][idx2];
 		}
 	}
 
@@ -154,16 +169,31 @@ u - the unknowns
 d - rhs matrix
 */
 void cyclic_reduction(
-	const vector<double>& a,
-	const vector<double>& b,
-	const vector<double>& c,
+	vector<double>& a,
+	vector<double>& b,
+	vector<double>& c,
 	vector<double>& u,
-	const vector<double>& d) {
+	vector<double>& d) {
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
 	int n = u.size();
 	int r = log2(n);
+
+	// fill with zeroes
+	int old_n = n;
+	int pow2 = 2;
+	while (pow2 - 1 < n) {
+		pow2 = pow2 * 2;
+	}
+	n = pow2 - 1;
+	while (u.size() != n) {
+		u.push_back(0);
+		a.push_back(0);
+		b.push_back(0);
+		c.push_back(0);
+		d.push_back(0);
+	}
 
 	// memory allocation
 	double *F = new double[n];
@@ -193,8 +223,8 @@ void cyclic_reduction(
 			int idx1 = j - offset;
 			int idx2 = j + offset;
 
-			double alpha = A[j][idx1] / A[idx1][idx1];
-			double gamma = A[j][idx2] / A[idx2][idx2];
+			double alpha = A[idx1][idx1] == 0 ? 0 : A[j][idx1] / A[idx1][idx1];
+			double gamma = A[idx2][idx2] == 0 ? 0 : A[j][idx2] / A[idx2][idx2];
 
 			for (int k = 0; k < n; k++) {
 				A[j][k] -= (alpha * A[idx1][k] + gamma * A[idx2][k]);
@@ -224,10 +254,13 @@ void cyclic_reduction(
 					u[idx2] -= A[idx2][k] * u[k];
 				}
 			}
-			u[idx1] = u[idx1] / A[idx1][idx1];
-			u[idx2] = u[idx2] / A[idx2][idx2];
+		
+			u[idx1] = A[idx1][idx1] == 0 ? 0 : u[idx1] / A[idx1][idx1];
+			u[idx2] = A[idx2][idx2] == 0 ? 0 : u[idx2] / A[idx2][idx2];
 		}
 	}
+
+	u.resize(old_n);
 
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	auto durationMicrosec = duration_cast<microseconds>(t2 - t1).count();
@@ -243,17 +276,32 @@ u - the unknowns
 d - rhs matrix
 */
 void cyclic_reduction_thr(
-	const vector<double>& a,
-	const vector<double>& b,
-	const vector<double>& c,
+	vector<double>& a,
+	vector<double>& b,
+	vector<double>& c,
 	vector<double>& u,
-	const vector<double>& d,
+	vector<double>& d,
 	int num_threads) {
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
 	int n = u.size();
 	int r = log2(n);
+
+	// fill with zeroes
+	int old_n = n;
+	int pow2 = 2;
+	while (pow2 - 1 < n) {
+		pow2 = pow2 * 2;
+	}
+	n = pow2 - 1;
+	while (u.size() != n) {
+		u.push_back(0);
+		a.push_back(0);
+		b.push_back(0);
+		c.push_back(0);
+		d.push_back(0);
+	}
 
 	// memory allocation
 	double *F = new double[n];
@@ -318,8 +366,8 @@ void cyclic_reduction_thr(
 					u[idx2] -= A[idx2][k] * u[k];
 				}
 			}
-			u[idx1] = u[idx1] / A[idx1][idx1];
-			u[idx2] = u[idx2] / A[idx2][idx2];
+			u[idx1] = A[idx1][idx1] == 0 ? 0 : u[idx1] / A[idx1][idx1];
+			u[idx2] = A[idx2][idx2] == 0 ? 0 : u[idx2] / A[idx2][idx2];
 		}
 	}
 
@@ -347,8 +395,8 @@ void inner_loop_cyclic_red(int i, int n, double** A, double* F, int id, const ve
 			continue;
 		}
 
-		double alpha = A[j][idx1] / A[idx1][idx1];
-		double gamma = A[j][idx2] / A[idx2][idx2];
+		double alpha = A[idx1][idx1] == 0 ? 0 : A[j][idx1] / A[idx1][idx1];
+		double gamma = A[idx2][idx2] == 0 ? 0 : A[j][idx2] / A[idx2][idx2];
 
 		for (int k = 0; k < n; k++) {
 			A[j][k] -= (alpha * A[idx1][k] + gamma * A[idx2][k]);
