@@ -1,16 +1,49 @@
 1023 DATA SIZE
 
 thomas
-run times:153,139,136,128,129,131,121,120,126,114(microsec)
+run times:153,139,136,128,129,131,121,120,126,114(microsec)a
+avg: 129.7
+speedup: 323.03
 
 cyclic red secv
 run times: 62312,44164,39053,39259,39099,39058,39078,39047,38925,38980(microsec)
+avg: 41897.5
 
 cyclic red omp,8 thr
 run times: 43891,36190,33450,32114,32888,32167,32503,32914,31620,32000(microsec)
+avg: 33973.7
+speedup: 1.23
 
 cyclic red omp,16 thr
 run times: 68085,52846,49443,48799,48461,48889,48321,47722,49398,49450(microsec)
+avg: 51141.4
+speedup: 0.81
 
 ----------------------------------------------
 
+32767 DATA SIZE (times in millisec)
+thomas
+run times:4,4,3,3,3,3,2,2,2,2
+avg: 2.8
+speedup: 14113.17
+
+cyclic red secv
+run times: 39685,39267,39440,39080,39013,39162,39055,39084,42083,39300
+avg: 39516.9
+
+cyclic red omp, 8
+run times:21603,21560,22560,21618,23319,22801,22588,22012,19026,22621
+avg: 21970.8
+speedup: 1.79
+
+cyclic red omp, 16
+run times:19425,21012,17480,22050,20245,17668,17001,17472,22229,20241
+avg: 19482.3
+speedup: 2.02
+
+-------------------------------------------------------------
+
+1048575 DATA SIZE (times in millisec)
+thomas
+run times:80,80,80
+avg: 80
