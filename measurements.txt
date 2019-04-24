@@ -1,3 +1,0 @@
-8 thread
-DataSize,SerialCyclicRed,OMP,Multithreading
-16383(2^14-1),9800,9395,9287

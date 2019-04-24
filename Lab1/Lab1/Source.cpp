@@ -110,28 +110,28 @@ void cyclic_reduction_omp(
 
 	high_resolution_clock::time_point tpart1start = high_resolution_clock::now();
 	omp_set_num_threads(num_threads);
+	omp_set_nested(0);
 	// cyclic reduction
+
 	for (int i = 0; i < log2(n + 1) - 1; i++) {
 		int kl = pow(2, i + 1);
 
-		#pragma omp parallel 
-		{
-			#pragma omp for
-			for (int j = kl - 1; j < n; j = j + kl) {
-				int offset = pow(2, i);
-				int idx1 = j - offset;
-				int idx2 = j + offset;
+		#pragma omp parallel for
+		for (int j = kl - 1; j < n; j = j + kl) {
+			int offset = pow(2, i);
+			int idx1 = j - offset;
+			int idx2 = j + offset;
 
-				double alpha = A[idx1][idx1] == 0 ? 0 : A[j][idx1] / A[idx1][idx1];
-				double gamma = A[idx2][idx2] == 0 ? 0 : A[j][idx2] / A[idx2][idx2];
+			double alpha = A[idx1][idx1] == 0 ? 0 : A[j][idx1] / A[idx1][idx1];
+			double gamma = A[idx2][idx2] == 0 ? 0 : A[j][idx2] / A[idx2][idx2];
 
-				for (int k = 0; k < n; k++) {
-					A[j][k] -= (alpha * A[idx1][k] + gamma * A[idx2][k]);
-				}
-				F[j] -= (alpha * F[idx1] + gamma * F[idx2]);
+			for (int k = 0; k < n; k++) {
+				A[j][k] -= (alpha * A[idx1][k] + gamma * A[idx2][k]);
 			}
+			F[j] -= (alpha * F[idx1] + gamma * F[idx2]);
 		}
 	}
+	
 	high_resolution_clock::time_point tpart1stop = high_resolution_clock::now();
 	auto durationMilisecp1 = duration_cast<milliseconds>(tpart1stop - tpart1start).count();
 	cout << "Millisec part1 " << durationMilisecp1 << endl;
@@ -148,14 +148,19 @@ void cyclic_reduction_omp(
 
 			u[idx1] = F[idx1];
 			u[idx2] = F[idx2];
+			
+			double sum1 = 0; double sum2 = 0;
+#pragma omp parallel for reduction(+:sum1,sum2)
 			for (int k = 0; k < n; k++) {
 				if (k != idx1) {
-					u[idx1] -= A[idx1][k] * u[k];
+					sum1 -= A[idx1][k] * u[k];
 				}
 				if (k != idx2) {
-					u[idx2] -= A[idx2][k] * u[k];
+					sum2 -= A[idx2][k] * u[k];
 				}
 			}
+			u[idx1] += sum1; u[idx2] += sum2;
+
 			u[idx1] = A[idx1][idx1] == 0 ? 0 : u[idx1] / A[idx1][idx1];
 			u[idx2] = A[idx2][idx2] == 0 ? 0 : u[idx2] / A[idx2][idx2];
 		}
@@ -373,6 +378,7 @@ void cyclic_reduction_thr(
 
 			u[idx1] = F[idx1];
 			u[idx2] = F[idx2];
+
 			for (int k = 0; k < n; k++) {
 				if (k != idx1) {
 					u[idx1] -= A[idx1][k] * u[k];
@@ -393,6 +399,14 @@ void cyclic_reduction_thr(
 	auto durationMilisec = duration_cast<milliseconds>(t2 - t1).count();
 	cout << "Microsec " << durationMicrosec << endl;
 	cout << "Millisec " << durationMilisec << endl;
+}
+
+void inner_loop_back_sub(int n, int tid, int num_threads, const vector<double>& u) {
+	int steps = n / num_threads;
+	if (n % num_threads != 0) {
+		steps += 1;
+	}
+
 }
 
 void inner_loop_cyclic_red(int i, int n, double** A, double* F, int id, const vector<int>& indexes, int num_threads) {
@@ -517,10 +531,13 @@ void perform_test_with_alg(int size, int threads, int algorithm) {
 	else if (alg == "cyclic red threads") {
 		cyclic_reduction_thr(a, b, c, u, d, threads);
 	}
+	else if (alg == "thomas") {
+		thomas(a, b, c, u, d);
+	}
 
 	for (int i = 0; i < u.size(); i++) {
 		if (std::abs(u[i] - 1) > 0.001) {
-			cout << "invalid result";
+			cout << "invalid result " << u[i] << endl;
 		}
 	}
 	cout << "finished";
@@ -535,6 +552,9 @@ string algorithm_select(int alg) {
 	}
 	else if (alg == 3) {
 		return "cyclic red threads";
+	}
+	else if (alg == 4) {
+		return "thomas";
 	}
 }
 
