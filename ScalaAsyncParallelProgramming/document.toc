@@ -1,0 +1,19 @@
+\contentsline {section}{\numberline {1}Introduction}{3}{section.1}
+\contentsline {subsection}{\numberline {1.1}The Scala programming language}{3}{subsection.1.1}
+\contentsline {subsection}{\numberline {1.2}Scala parallel and concurrent programming}{3}{subsection.1.2}
+\contentsline {section}{\numberline {2}Futures and Promises}{3}{section.2}
+\contentsline {subsection}{\numberline {2.1}Future}{3}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Promise}{5}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}Comparison with other languages}{6}{subsection.2.3}
+\contentsline {subsection}{\numberline {2.4}In practice}{6}{subsection.2.4}
+\contentsline {section}{\numberline {3}The Actor model}{7}{section.3}
+\contentsline {subsection}{\numberline {3.1}Model overview}{7}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}The Actor model in Scala}{7}{subsection.3.2}
+\contentsline {subsubsection}{\numberline {3.2.1}Actor Systems}{8}{subsubsection.3.2.1}
+\contentsline {subsubsection}{\numberline {3.2.2}Actor references}{8}{subsubsection.3.2.2}
+\contentsline {subsubsection}{\numberline {3.2.3}Message dispatchers}{8}{subsubsection.3.2.3}
+\contentsline {subsubsection}{\numberline {3.2.4}Supervision hierarchy}{9}{subsubsection.3.2.4}
+\contentsline {subsection}{\numberline {3.3}Advantages and disadvantages of the Actor Model}{9}{subsection.3.3}
+\contentsline {subsection}{\numberline {3.4}Comparison Erlang Actor Model implementations}{10}{subsection.3.4}
+\contentsline {subsection}{\numberline {3.5}An example of an Actor based application}{10}{subsection.3.5}
+\contentsline {section}{\numberline {4}Conclusions}{12}{section.4}

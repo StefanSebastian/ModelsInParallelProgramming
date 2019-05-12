@@ -1,0 +1,55 @@
+\begin{thebibliography}{10}
+
+\bibitem{AnOverviewOfTheScalaProgrammingLanguage}
+M.~Odersky, P.~Altherr, V.~Cremet, B.~Emir, S.~Maneth, S.~Micheloud,
+  N.~Mihaylov, M.~Schinz, E.~Stenman, and M.~Zenger, ``An overview of the scala
+  programming language,'' 12 2008.
+
+\bibitem{ScalaJs}
+S.~Doeraene, ``Scala.js: Type-directed interoperability with dynamically typed
+  languages,'' p.~10, 2013.
+
+\bibitem{FuturePromiseScalaDocs}
+``Futures and promises.''
+  \url{https://docs.scala-lang.org/overviews/core/futures.html}.
+\newblock Accessed: 2019-05-08.
+
+\bibitem{FuturePromiseNeophyte}
+``The neophyte's guide to scala.''
+  \url{https://danielwestheide.com/blog/2013/01/16/the-neophytes-guide-to-scala-part-9-promises-and-futures-in-practice.html}.
+\newblock Accessed: 2019-05-08.
+
+\bibitem{SingletonObj}
+``Singleton objects.''
+  \url{https://docs.scala-lang.org/tour/singleton-objects.html}.
+\newblock Accessed: 2019-05-08.
+
+\bibitem{ScalaInAction}
+N.~Raychaudhuri, {\em Scala in Action}.
+\newblock Greenwich, CT, USA: Manning Publications Co., 2013.
+
+\bibitem{FutureJava}
+``Guide to java.util.concurrent.future.''
+  \url{https://www.baeldung.com/java-future}.
+\newblock Accessed: 2019-05-09.
+
+\bibitem{FutureJs}
+``Javascript promises: an introduction.''
+  \url{https://developers.google.com/web/fundamentals/primers/promises#chaining}.
+\newblock Accessed: 2019-05-09.
+
+\bibitem{ProgrammingInScala}
+M.~Odersky, L.~Spoon, and B.~Venners, {\em Programming in Scala: Updated for
+  Scala 2.12}.
+\newblock USA: Artima Incorporation, 3rd~ed., 2016.
+
+\bibitem{AkkaDocs}
+``Akka documentation.'' \url{https://doc.akka.io/docs/akka/2.5.5/scala/}.
+\newblock Accessed: 2019-05-09.
+
+\bibitem{ErlangVsScala}
+``Erlang vs scala, a history of tradeoffs.''
+  \url{https://medium.com/@emqtt/erlang-vs-scala-5b5190326ef5}.
+\newblock Accessed: 2019-05-12.
+
+\end{thebibliography}
