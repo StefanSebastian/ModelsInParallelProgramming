@@ -4,8 +4,10 @@
 #include<iostream>
 #include<cmath>
 #include<random>
+#include<chrono>
 
 using namespace std;
+using namespace std::chrono;
 
 ifstream fin("in.txt");
 ofstream fout("out.txt");
@@ -16,6 +18,8 @@ double **X1, **X2;
 int max_steps;
 double min_error;
 vector<double> a, b, c;
+int sol_type; // 1 = sequential, 2 = parallel
+int nthreads;
 
 void thomas(
 	const vector<double>& a,
@@ -119,6 +123,7 @@ void constructBForX1(int j, vector<double>& B) {
 }
 
 void solveX1() {
+	cout << "Solving for X1" << endl;
 	// solve for X1
 	for (int j = 1; j < n - 1; j++) {
 		// A x X(:,j) = Bj
@@ -147,6 +152,7 @@ void constructBForX2(int j, vector<double>& B) {
 }
 
 void solveX2() {
+	cout << "Solving for X2 " << endl;
 	// solve for X2
 	for (int i = 1; i < n - 1; i++) {
 		// A x X(i,:) = Bj
@@ -189,18 +195,26 @@ void moveX2intoX0() {
 	}
 }
 
-void solveSystems() {
-	
+void solveSystemsSequentially() {
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
+	cout << "Sequential solution " << endl;
 	double error = std::numeric_limits<double>::max();
 	int steps = 0;
 	while (steps < max_steps && error > min_error) {
+		steps += 1;
+		cout << "Steps " << steps << endl;
+
 		solveX1();
 		solveX2();
 		error = computeError();
-		steps += 1;
-		cout << "Steps " << steps << endl;
+
 		moveX2intoX0();
 	}
+
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	auto durationMilisec = duration_cast<milliseconds>(t2 - t1).count();
+	cout << "Millisec " << durationMilisec << endl;
 }
 
 void printMat() {
@@ -230,9 +244,8 @@ void printMat() {
 }
 
 int parseInput(int argc, char* argv[]) {
-	// expect n, min, max, maxsteps, minerr
-	if (argc != 6) {
-		cout << "invalid nr of args; expected <n> <min> <max> <maxsteps> <minerr>" << endl;
+	if (argc != 8) {
+		cout << "invalid nr of args; expected <n> <min> <max> <maxsteps> <minerr> <soltype> <nthreads>" << endl;
 		return 1;
 	}
 
@@ -243,8 +256,17 @@ int parseInput(int argc, char* argv[]) {
 	max_steps = atoi(argv[4]);
 	sscanf(argv[5], "%lf", &min_error);
 
+	sol_type = atoi(argv[6]);
+	nthreads = atoi(argv[7]);
+
 	cout << "Running with n " << n << ", max_steps " << max_steps << ", min_error " << min_error << ", range " << min << ", " << max << endl;
-	
+	if (sol_type == 1) {
+		cout << "Sequential algorithm" << endl;
+	}
+	else {
+		cout << "Parallel algorithm " << nthreads << " threads " << endl;
+	}
+
 	std::uniform_real_distribution<double> unif(min, max);
 	std::default_random_engine re;
 	
@@ -260,7 +282,13 @@ int main(int argc, char* argv[]) {
 	}
 	generateThomasArrays();
 
-	solveSystems();
+	if (sol_type == 1) {
+		solveSystemsSequentially();
+	}
+	else {
+
+	}
+	
 
 	cout << "Done" << endl;
 
