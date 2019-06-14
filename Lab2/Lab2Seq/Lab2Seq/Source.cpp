@@ -6,10 +6,6 @@
 #include<random>
 #include<chrono>
 
-#include <mpi.h>
-#include "stdio.h"
-#include "stdlib.h"
-
 using namespace std;
 using namespace std::chrono;
 
@@ -76,11 +72,11 @@ void readData() {
 	cout << "Reading input data" << endl;
 	fin >> n;
 	X0 = new double*[n];
-	X1 = new double*[n]; 
+	X1 = new double*[n];
 	X2 = new double*[n];
 	for (int i = 0; i < n; i++) {
 		X0[i] = new double[n];
-		X1[i] = new double[n]; 
+		X1[i] = new double[n];
 		X2[i] = new double[n];
 	}
 	for (int i = 0; i < n; i++) {
@@ -119,7 +115,7 @@ void generateData(uniform_real_distribution<double> unif, std::default_random_en
 void constructBForX1(int j, vector<double>& B) {
 	B.push_back(border(0, X0));
 	for (int i = 1; i < n - 1; i++) {
-		B.push_back(f(X0[i][j], X0[i+1][j], X0[i-1][j], X0[i][j+1], X0[i][j-1]));
+		B.push_back(f(X0[i][j], X0[i + 1][j], X0[i - 1][j], X0[i][j + 1], X0[i][j - 1]));
 	}
 	B.push_back(border(1, X0));
 }
@@ -259,10 +255,11 @@ int parseInput(int argc, char* argv[]) {
 	sscanf(argv[5], "%lf", &min_error);
 
 	cout << "Running with n " << n << ", max_steps " << max_steps << ", min_error " << min_error << ", range " << min << ", " << max << endl;
+	cout << "Sequential algorithm" << endl;
 
 	std::uniform_real_distribution<double> unif(min, max);
 	std::default_random_engine re;
-	
+
 	generateData(unif, re);
 
 	return 0;
@@ -278,30 +275,7 @@ void printOutput() {
 }
 
 
-int solveSystemWithMPI() {
-	int world_size;
-	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-	cout << world_size << " ";
-
-	int rank;
-
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	if (rank == 0) {
-		char helloStr[] = "Hello World";
-		MPI_Send(helloStr, _countof(helloStr), MPI_CHAR, 1, 0, MPI_COMM_WORLD);
-	}
-	else if (rank == 1) {
-		char helloStr[12];
-		MPI_Recv(helloStr, _countof(helloStr), MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		printf("Rank 1 received string %s from rank 0", helloStr);
-	}
-
-	return 0;
-}
-
 int main(int argc, char* argv[]) {
-	// Initialize the MPI environment
-	MPI_Init(&argc, &argv);
 
 	cout << "Started..." << endl;
 	if (parseInput(argc, argv) != 0) {
@@ -309,13 +283,10 @@ int main(int argc, char* argv[]) {
 	}
 	generateThomasArrays();
 
-	solveSystemWithMPI();
+	solveSystemsSequentially();
 	
 	printOutput();
 	cout << "Done" << endl;
-
-	//printMat();
-	MPI_Finalize();
 
 	return 0;
 }
