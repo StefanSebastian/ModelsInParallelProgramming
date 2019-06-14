@@ -9,9 +9,10 @@ u - the unknowns
 d - rhs matrix
 */
 void thomas(
-	const vector<double>& a,
-	const vector<double>& b,
-	const vector<double>& c,
-	vector<double>& u,
-	const vector<double>& d
+	int n,
+	double* a,
+	double* b,
+	double* c,
+	double* u,
+	double* d
 );

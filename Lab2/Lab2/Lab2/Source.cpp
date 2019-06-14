@@ -21,16 +21,16 @@ double a1, a2, a3, ast, aend, **X0;
 double **X1, **X2;
 int max_steps;
 double min_error;
-vector<double> a, b, c;
+double *a, *b, *c;
 
 void thomas(
-	const vector<double>& a,
-	const vector<double>& b,
-	const vector<double>& c,
-	vector<double>& u,
-	const vector<double>& d) {
-
-	int n = u.size();
+	int n,
+	double* a,
+	double* b,
+	double* c,
+	double* u,
+	double* d
+) {
 	vector<double> p(n);
 	vector<double> q(n);
 
@@ -58,18 +58,14 @@ double border(int k, double** mat) {
 
 void generateThomasArrays() {
 	cout << "generating thomas arrays" << endl;
-
-	b.push_back(ast);
-	a.push_back(0);
-	c.push_back(0);
+	a = new double[n];
+	b = new double[n];
+	c = new double[n];
+	a[0] = 0; b[0] = ast; c[0] = 0;
 	for (int i = 1; i <= n - 2; i++) {
-		b.push_back(a2);
-		a.push_back(a1);
-		c.push_back(a3);
+		a[i] = a1; b[i] = a2; c[i] = a3;
 	}
-	b.push_back(aend);
-	a.push_back(0);
-	c.push_back(0);
+	b[n - 1] = aend; c[n - 1] = 0; a[n - 1] = 0;
 }
 
 void readData() {
@@ -116,62 +112,20 @@ void generateData(uniform_real_distribution<double> unif, std::default_random_en
 	aend = unif(re);
 }
 
-void constructBForX1(int j, vector<double>& B) {
-	B.push_back(border(0, X0));
+void constructBForX1(int j, double* B) {
+	B[0] = border(0, X0);
 	for (int i = 1; i < n - 1; i++) {
-		B.push_back(f(X0[i][j], X0[i+1][j], X0[i-1][j], X0[i][j+1], X0[i][j-1]));
+		B[i] = f(X0[i][j], X0[i+1][j], X0[i-1][j], X0[i][j+1], X0[i][j-1]);
 	}
-	B.push_back(border(1, X0));
+	B[n - 1] = border(1, X0);
 }
 
-void solveX1() {
-	cout << "Solving for X1" << endl;
-	// solve for X1
-	for (int j = 1; j < n - 1; j++) {
-		// A x X(:,j) = Bj
-		vector<double> B;
-		constructBForX1(j, B);
-
-		vector<double> res(n);
-		thomas(a, b, c, res, B);
-
-		for (int i = 0; i < n; i++) {
-			X1[i][j] = res[i];
-		}
-	}
-	for (int i = 0; i < n; i++) {
-		X1[i][0] = X0[i][0];
-		X1[i][n - 1] = X0[i][n - 1];
-	}
-}
-
-void constructBForX2(int j, vector<double>& B) {
-	B.push_back(border(2, X1));
+void constructBForX2(int j, double* B) {
+	B[0] = border(2, X1);
 	for (int i = 1; i < n - 1; i++) {
-		B.push_back(f(X1[i][j], X1[i + 1][j], X1[i - 1][j], X1[i][j + 1], X1[i][j - 1]));
+		B[i] = f(X1[i][j], X1[i + 1][j], X1[i - 1][j], X1[i][j + 1], X1[i][j - 1]);
 	}
-	B.push_back(border(3, X1));
-}
-
-void solveX2() {
-	cout << "Solving for X2 " << endl;
-	// solve for X2
-	for (int i = 1; i < n - 1; i++) {
-		// A x X(i,:) = Bj
-		vector<double> B;
-		constructBForX2(i, B);
-
-		vector<double> res(n);
-		thomas(a, b, c, res, B);
-
-		for (int j = 0; j < n; j++) {
-			X2[i][j] = res[j];
-		}
-	}
-	for (int i = 0; i < n; i++) {
-		X2[0][i] = X1[0][i];
-		X2[n - 1][i] = X1[n - 1][i];
-	}
+	B[n - 1] = border(3, X1);
 }
 
 double computeError() {
@@ -195,28 +149,6 @@ void moveX2intoX0() {
 			X0[i][j] = X2[i][j];
 		}
 	}
-}
-
-void solveSystemsSequentially() {
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-
-	cout << "Sequential solution " << endl;
-	double error = std::numeric_limits<double>::max();
-	int steps = 0;
-	while (steps < max_steps && error > min_error) {
-		steps += 1;
-		cout << "Steps " << steps << endl;
-
-		solveX1();
-		solveX2();
-		error = computeError();
-
-		moveX2intoX0();
-	}
-
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	auto durationMilisec = duration_cast<milliseconds>(t2 - t1).count();
-	cout << "Millisec " << durationMilisec << endl;
 }
 
 void printMat() {
@@ -284,18 +216,13 @@ void solveParallelX1() {
 	// solve for X1
 	for (int j = 1; j < n - 1; j++) {
 		// A x X(:,j) = Bj
-		vector<double> B;
+		double* B = new double[n];
 		constructBForX1(j, B);
-
 		int sendto = j % size;
 		if (sendto == 0) {
 			sendto += 1;
 		}
-		double* msg = new double[n];
-		for (int i = 0; i < n; i++) {
-			msg[i] = B[i];
-		}
-		MPI_Send(msg, n, MPI_DOUBLE, sendto, j, MPI_COMM_WORLD);
+		MPI_Send(B, n, MPI_DOUBLE, sendto, j, MPI_COMM_WORLD);
 	}
 
 	double* resp = new double[n];
@@ -321,11 +248,11 @@ void solveParallelX2() {
 	// solve for X2
 	for (int i = 1; i < n - 1; i++) {
 		// A x X(i,:) = Bj
-		vector<double> B;
+		double* B = new double[n];
 		constructBForX2(i, B);
 
-		vector<double> res(n);
-		thomas(a, b, c, res, B);
+		double* res = new double[n];
+		thomas(n, a, b, c, res, B);
 
 		for (int j = 0; j < n; j++) {
 			X2[i][j] = res[j];
@@ -349,18 +276,14 @@ void broadcastData() {
 	MPI_Bcast(&aend, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 }
 
-
-
-
 void worker_x1() {
 	int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	int size; MPI_Comm_size(MPI_COMM_WORLD, &size);
 
 	cout << "Worker " << rank << " running " << endl;
 
-	double* buff = new double[n];
-	vector<double> B(n);
-	vector<double> res(n);
+	double* B = new double[n];
+	double* res = new double[n];
 
 	for (int j = 1; j < n - 1; j++) {
 		int recvfr = j % size;
@@ -368,17 +291,9 @@ void worker_x1() {
 			recvfr += 1;
 		}
 		if (recvfr == rank) {
-			MPI_Recv(buff, n, MPI_DOUBLE, 0, j, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			for (int i = 0; i < n; i++) {
-				B.push_back(buff[i]);
-			}
-
-			thomas(a, b, c, res, B);
-			for (int i = 0; i < n; i++) {
-				buff[i] = res[i];
-			}
-
-			MPI_Send(buff, n, MPI_DOUBLE, 0, j, MPI_COMM_WORLD);
+			MPI_Recv(B, n, MPI_DOUBLE, 0, j, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			thomas(n, a, b, c, res, B);
+			MPI_Send(res, n, MPI_DOUBLE, 0, j, MPI_COMM_WORLD);
 		}
 	}
 }
@@ -387,7 +302,6 @@ void start_worker() {
 	int stop = 0;
 	while (stop == 0) {
 		MPI_Recv(&stop, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		cout << "received " << stop << endl;
 		if (stop != 0) {
 			break;
 		}
@@ -443,10 +357,10 @@ int main(int argc, char* argv[]) {
 
 	cout << "Started..." << endl;
 	if (rank == 0) {
-		if (parseInput(argc, argv) != 0) {
-			return 0;
-		}
-	
+		//if (parseInput(argc, argv) != 0) {
+		//	return 0;
+		//}
+		readData();
 	}
 	broadcastData();
 	generateThomasArrays();

@@ -243,7 +243,7 @@ void printMat() {
 
 int parseInput(int argc, char* argv[]) {
 	if (argc != 6) {
-		cout << "invalid nr of args; expected <n> <min> <max> <maxsteps> <minerr> <soltype>" << endl;
+		cout << "invalid nr of args; expected <n> <min> <max> <maxsteps> <minerr>" << endl;
 		return 1;
 	}
 
@@ -278,9 +278,10 @@ void printOutput() {
 int main(int argc, char* argv[]) {
 
 	cout << "Started..." << endl;
-	if (parseInput(argc, argv) != 0) {
-		return 0;
-	}
+	//if (parseInput(argc, argv) != 0) {
+	//	return 0;
+	//}
+	readData();
 	generateThomasArrays();
 
 	solveSystemsSequentially();
