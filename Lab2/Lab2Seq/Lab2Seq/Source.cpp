@@ -189,28 +189,6 @@ void moveX2intoX0() {
 	}
 }
 
-void solveSystemsSequentially() {
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-
-	cout << "Sequential solution " << endl;
-	double error = std::numeric_limits<double>::max();
-	int steps = 0;
-	while (steps < max_steps && error > min_error) {
-		steps += 1;
-		cout << "Steps " << steps << endl;
-
-		solveX1();
-		solveX2();
-		error = computeError();
-
-		moveX2intoX0();
-	}
-
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	auto durationMilisec = duration_cast<milliseconds>(t2 - t1).count();
-	cout << "Millisec " << durationMilisec << endl;
-}
-
 void printMat() {
 	cout << "----------------------X0-------------------" << endl;
 	for (int i = 0; i < n; i++) {
@@ -235,6 +213,30 @@ void printMat() {
 	}
 
 	cout << "------------------------------------------" << endl;
+}
+
+void solveSystemsSequentially() {
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
+	cout << "Sequential solution " << endl;
+	double error = std::numeric_limits<double>::max();
+	int steps = 0;
+	while (steps < max_steps && error > min_error) {
+		steps += 1;
+		cout << "Steps " << steps << endl;
+
+		solveX1();
+		solveX2();
+
+		error = computeError();
+		if (error > min_error) {
+			moveX2intoX0();
+		}
+	}
+
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	auto durationMilisec = duration_cast<milliseconds>(t2 - t1).count();
+	cout << "Millisec " << durationMilisec << endl;
 }
 
 int parseInput(int argc, char* argv[]) {

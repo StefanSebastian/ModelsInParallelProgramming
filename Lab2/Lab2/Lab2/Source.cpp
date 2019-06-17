@@ -315,10 +315,8 @@ void solveParallelX2() {
 		}
 	}
 
-	for (int i = 1; i < size; i++) {
-		if (rank == i) {
-			MPI_Send(resTotal, n * n, MPI_DOUBLE, 0, i, MPI_COMM_WORLD);
-		}
+	if (rank != 0) {
+		MPI_Send(resTotal, n * n, MPI_DOUBLE, 0, rank, MPI_COMM_WORLD);
 	}
 
 	if (rank == 0) {
@@ -401,7 +399,9 @@ int solveSystemWithMPI() {
 
 		if (rank == 0) {
 			error = computeError();
-			moveX2intoX0();
+			if (error > min_error) {
+				moveX2intoX0();
+			}
 		}
 
 		MPI_Bcast(&error, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
