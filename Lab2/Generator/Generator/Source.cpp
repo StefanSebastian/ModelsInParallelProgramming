@@ -55,8 +55,6 @@ void generateData(uniform_real_distribution<double> unif, std::default_random_en
 	aend = unif(re);
 }
 
-
-
 int parseInput(int argc, char* argv[]) {
 	if (argc != 6) {
 		cout << "invalid nr of args; expected <n> <min> <max> <maxsteps> <minerr>" << endl;

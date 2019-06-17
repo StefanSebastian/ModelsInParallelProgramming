@@ -1,11 +1,10 @@
-#include<thread>
+
 #include<fstream>
 #include<vector>
 #include<iostream>
 #include<cmath>
 #include<random>
 #include<chrono>
-#include<omp.h>
 
 #include <mpi.h>
 #include "stdio.h"
@@ -73,11 +72,11 @@ void readData() {
 	cout << "Reading input data" << endl;
 	fin >> n;
 	X0 = new double*[n];
-	X1 = new double*[n];
+	X1 = new double*[n]; 
 	X2 = new double*[n];
 	for (int i = 0; i < n; i++) {
 		X0[i] = new double[n];
-		X1[i] = new double[n];
+		X1[i] = new double[n]; 
 		X2[i] = new double[n];
 	}
 	for (int i = 0; i < n; i++) {
@@ -115,16 +114,14 @@ void generateData(uniform_real_distribution<double> unif, std::default_random_en
 
 void constructBForX1(int j, double* B) {
 	B[0] = border(0, X0);
-//#pragma omp parallel for
 	for (int i = 1; i < n - 1; i++) {
-		B[i] = f(X0[i][j], X0[i + 1][j], X0[i - 1][j], X0[i][j + 1], X0[i][j - 1]);
+		B[i] = f(X0[i][j], X0[i+1][j], X0[i-1][j], X0[i][j+1], X0[i][j-1]);
 	}
 	B[n - 1] = border(1, X0);
 }
 
 void constructBForX2(int j, double* B) {
 	B[0] = border(2, X1);
-//#pragma omp parallel for
 	for (int i = 1; i < n - 1; i++) {
 		B[i] = f(X1[i][j], X1[i + 1][j], X1[i - 1][j], X1[i][j + 1], X1[i][j - 1]);
 	}
@@ -196,7 +193,7 @@ int parseInput(int argc, char* argv[]) {
 
 	std::uniform_real_distribution<double> unif(min, max);
 	std::default_random_engine re;
-
+	
 	generateData(unif, re);
 
 	return 0;
@@ -219,71 +216,30 @@ int getCurrentRank(int idx, int size) {
 	return worker_rank;
 }
 
-void receiveBlockX1(int i) {
-	int size; MPI_Comm_size(MPI_COMM_WORLD, &size);
-	double* resTotal = new double[n * n];
-	MPI_Recv(resTotal, n * n, MPI_DOUBLE, i, i, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	int counter = 0;
-	for (int j = 1; j < n - 1; j++) {
-		int worker = getCurrentRank(j, size);
-		if (worker == i) {
-			for (int k = 0; k < n; k++) {
-				X1[k][j] = resTotal[counter * n + k];
-			}
-			counter++;
-		}
-	}
-}
-
-void receiveBlockX2(int i) {
-	int size; MPI_Comm_size(MPI_COMM_WORLD, &size);
-	double* resTotal = new double[n * n];
-	MPI_Recv(resTotal, n * n, MPI_DOUBLE, i, i, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	int counter = 0;
-	for (int j = 1; j < n - 1; j++) {
-		int worker = getCurrentRank(j, size);
-		if (worker == i) {
-			for (int k = 0; k < n; k++) {
-				X2[j][k] = resTotal[counter * n + k];
-			}
-			counter++;
-		}
-	}
-}
-
 void solveParallelX1() {
 	int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	int size; MPI_Comm_size(MPI_COMM_WORLD, &size);
 
 	double* B = new double[n];
 	double* res = new double[n];
-	double* resTotal = new double[n * n];
-	int counter = 0;
 
 	for (int j = 1; j < n - 1; j++) {
 		int worker_rank = getCurrentRank(j, size);
 		if (rank == worker_rank) {
 			constructBForX1(j, B);
 			thomas(n, a, b, c, res, B);
-			for (int i = counter * n; i < counter * n + n; i++) {
-				resTotal[i] = res[i - counter * n];
-			}
-			counter++;
-		}
-	}
-	for (int i = 1; i < size; i++) {
-		if (rank == i) {
-			MPI_Send(resTotal, n * n, MPI_DOUBLE, 0, i, MPI_COMM_WORLD);
+			MPI_Send(res, n, MPI_DOUBLE, 0, j, MPI_COMM_WORLD);
 		}
 	}
 
+	// gather answers
 	if (rank == 0) {
-		thread* thr = new thread[size];
-		for (int i = 1; i < size; i++) {
-			thr[i] = std::thread(receiveBlockX1, i);
-		}
-		for (int i = 1; i < size; i++) {
-			thr[i].join();
+		for (int j = 1; j < n - 1; j++) {
+			int recvfr = getCurrentRank(j, size);
+			MPI_Recv(res, n, MPI_DOUBLE, recvfr, j, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			for (int i = 0; i < n; i++) {
+				X1[i][j] = res[i];
+			}
 		}
 
 		for (int i = 0; i < n; i++) {
@@ -294,49 +250,6 @@ void solveParallelX1() {
 }
 
 void solveParallelX2() {
-	int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	int size; MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-	double* B = new double[n];
-	double* res = new double[n];
-	double* resTotal = new double[n * n];
-	int counter = 0;
-
-	for (int i = 1; i < n - 1; i++) {
-		int worker_rank = getCurrentRank(i, size);
-		if (rank == worker_rank) {
-			constructBForX2(i, B);
-			thomas(n, a, b, c, res, B);
-			for (int j = counter * n; j < counter * n + n; j++) {
-				resTotal[j] = res[j - counter * n];
-			}
-			counter++;
-		}
-	}
-
-	for (int i = 1; i < size; i++) {
-		if (rank == i) {
-			MPI_Send(resTotal, n * n, MPI_DOUBLE, 0, i, MPI_COMM_WORLD);
-		}
-	}
-
-	if (rank == 0) {
-		thread* thr = new thread[size];
-		for (int i = 1; i < size; i++) {
-			thr[i] = std::thread(receiveBlockX2, i);
-		}
-		for (int i = 1; i < size; i++) {
-			thr[i].join();
-		}
-
-		for (int i = 0; i < n; i++) {
-			X2[0][i] = X1[0][i];
-			X2[n - 1][i] = X1[n - 1][i];
-		}
-	}
-}
-
-void solveSerialX2() {
 	// solve for X2
 	for (int i = 1; i < n - 1; i++) {
 		// A x X(i,:) = Bj
@@ -356,10 +269,8 @@ void solveSerialX2() {
 	}
 }
 
-void broadcastMatX0() {
+void broadcastMat() {
 	int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	int size; MPI_Comm_size(MPI_COMM_WORLD, &size);
-
 	if (rank != 0) {
 		X0 = new double*[n];
 		for (int i = 0; i < n; i++) {
@@ -368,21 +279,6 @@ void broadcastMatX0() {
 	}
 	for (int i = 0; i < n; i++) {
 		MPI_Bcast(X0[i], n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	}
-}
-
-void broadcastMatX1() {
-	int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	int size; MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-	if (rank != 0) {
-		X1 = new double*[n];
-		for (int i = 0; i < n; i++) {
-			X1[i] = new double[n];
-		}
-	}
-	for (int i = 0; i < n; i++) {
-		MPI_Bcast(X1[i], n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	}
 }
 
@@ -397,14 +293,14 @@ int solveSystemWithMPI() {
 	int steps = 0;
 	while (steps < max_steps && error > min_error) {
 		steps += 1;
-
-		broadcastMatX0();
+	
+		broadcastMat();
 
 		solveParallelX1();
-
-		broadcastMatX1();
-
-		solveParallelX2();
+		
+		if (rank == 0) {
+			solveParallelX2();
+		}
 
 		if (rank == 0) {
 			error = computeError();
@@ -426,7 +322,7 @@ int solveSystemWithMPI() {
 		cout << "Millisec " << durationMilisec << endl;
 
 	}
-
+	
 	return 0;
 }
 
@@ -442,12 +338,10 @@ void broadcastData() {
 }
 
 int main(int argc, char* argv[]) {
-
+	
 
 	// Initialize the MPI environment
-	int provided;
-	MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
-	//omp_set_num_threads(2);
+	MPI_Init(&argc, &argv);
 
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -462,6 +356,8 @@ int main(int argc, char* argv[]) {
 	broadcastData();
 	generateThomasArrays();
 	solveSystemWithMPI();
+
+
 
 	//printMat();
 	MPI_Finalize();
