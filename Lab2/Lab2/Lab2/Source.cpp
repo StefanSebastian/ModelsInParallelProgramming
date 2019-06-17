@@ -135,17 +135,22 @@ double computeError() {
 	// error computation
 	double error = std::numeric_limits<double>::min();
 	for (int i = 0; i < n; i++) {
+		double local_error = std::numeric_limits<double>::min();
+#pragma omp parallel for reduction(max: local_error)
 		for (int j = 0; j < n; j++) {
-			double curr = abs(X2[i][j] - X0[i][j]);
-			if (error < curr) {
-				error = curr;
+			if (local_error < abs(X2[i][j] - X0[i][j])) {
+				local_error = abs(X2[i][j] - X0[i][j]);
 			}
+		}
+		if (error < local_error) {
+			error = local_error;
 		}
 	}
 	return error;
 }
 
 void moveX2intoX0() {
+#pragma omp parallel for
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
 			X0[i][j] = X2[i][j];
