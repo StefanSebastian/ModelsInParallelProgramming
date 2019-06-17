@@ -183,9 +183,9 @@ double computeError() {
 
 void moveX2intoX0() {
 	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < n; j++) {
-			X0[i][j] = X2[i][j];
-		}
+		delete X0[i];
+		X0[i] = X2[i];
+		X2[i] = new double[n];
 	}
 }
 

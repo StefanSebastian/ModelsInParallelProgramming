@@ -134,16 +134,12 @@ void constructBForX2(int j, double* B) {
 double computeError() {
 	// error computation
 	double error = std::numeric_limits<double>::min();
+#pragma omp parallel for reduction(max: error)
 	for (int i = 0; i < n; i++) {
-		double local_error = std::numeric_limits<double>::min();
-#pragma omp parallel for reduction(max: local_error)
 		for (int j = 0; j < n; j++) {
-			if (local_error < abs(X2[i][j] - X0[i][j])) {
-				local_error = abs(X2[i][j] - X0[i][j]);
+			if (error < abs(X2[i][j] - X0[i][j])) {
+				error = abs(X2[i][j] - X0[i][j]);
 			}
-		}
-		if (error < local_error) {
-			error = local_error;
 		}
 	}
 	return error;
@@ -152,9 +148,9 @@ double computeError() {
 void moveX2intoX0() {
 #pragma omp parallel for
 	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < n; j++) {
-			X0[i][j] = X2[i][j];
-		}
+		delete X0[i];
+		X0[i] = X2[i];
+		X2[i] = new double[n];
 	}
 }
 
@@ -363,14 +359,7 @@ void solveSerialX2() {
 
 void broadcastMatX0() {
 	int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	int size; MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-	if (rank != 0) {
-		X0 = new double*[n];
-		for (int i = 0; i < n; i++) {
-			X0[i] = new double[n];
-		}
-	}
 	for (int i = 0; i < n; i++) {
 		MPI_Bcast(X0[i], n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	}
@@ -378,7 +367,6 @@ void broadcastMatX0() {
 
 void broadcastMatX1() {
 	int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	int size; MPI_Comm_size(MPI_COMM_WORLD, &size);
 
 	if (rank != 0) {
 		X1 = new double*[n];
@@ -435,6 +423,15 @@ int solveSystemWithMPI() {
 	return 0;
 }
 
+void allocate_mats() {
+	X0 = new double*[n];
+	X1 = new double*[n];
+	for (int i = 0; i < n; i++) {
+		X0[i] = new double[n];
+		X1[i] = new double[n];
+	}
+}
+
 void broadcastData() {
 	MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&a1, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -464,7 +461,12 @@ int main(int argc, char* argv[]) {
 		//}
 		readData();
 	}
+
 	broadcastData();
+	if (rank != 0) {
+		allocate_mats();
+	}
+
 	generateThomasArrays();
 	solveSystemWithMPI();
 
